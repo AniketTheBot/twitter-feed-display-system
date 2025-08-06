@@ -1,0 +1,17 @@
+# Ignore dependencies
+node_modules
+/backend/node_modules
+/frontend/node_modules
+
+# Ignore build output
+/frontend/dist
+
+# Ignore environment files
+.env
+*.env
+
+# Ignore logs
+*.log
+
+# Ignore database file
+*.sqlite
