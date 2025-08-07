@@ -12,7 +12,7 @@ The system features a separate control panel for managing tracked accounts and a
 - **Kiosk-Style Display**: A dedicated, full-screen display page (`/display/:username`) that cycles through tweets with smooth fade transitions.
 - **QR Code Integration**: Each tweet is displayed with a unique, scannable QR code that links directly to its original URL.
 - **Smart Deduplication**: The backend ensures that no tweet is ever stored in the database more than once.
-- **Self-Cleaning Database**: A TTL (Time-To-Live) index on the `tweets` collection automatically purges records older than 7 days to keep the database lean.
+- **Transactional and Resilient Operations**: Implemented a global error handler and transactional logic for all API interactions. This includes a "rollback" feature that automatically cleans up the database if an operation fails midway, ensuring data consistency and providing clear, specific error messages to the user.
 - **Robust Development Environment**: The application features a crucial DEV/PROD switch. In development mode, it uses a high-fidelity, in-memory mock database, preserving API rate limits and allowing for fast, offline testing.
   > **Note:** The mock data uses real account information but placeholder `tweetId`s. Therefore, while in development mode, the generated QR codes will link to a valid user's profile but will result in a "post not found" error on X.com. Full QR code functionality is present when the application is run in `production` mode.
 
