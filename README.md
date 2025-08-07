@@ -67,11 +67,13 @@ Follow these instructions to get a copy of the project up and running on your lo
     - Select **Download ZIP** from the dropdown menu.
     - Unzip the downloaded file (`twitter-feed-display-system-main.zip`) to a location on your computer.
     - Open your terminal and navigate into the extracted project folder (e.g., `cd path/to/twitter-feed-display-system-main`).
-    - Rename the folder to `twitter-feed-display-system` for consistency.
+    - In the same folder open your terminal and run the following command to rename the folder to `twitter-feed-display-system` for consistency.
 
     ```sh
     mv twitter-feed-display-system-main twitter-feed-display-system
     ```
+
+    - Now, you can navigate into the project folder:
 
     ```sh
     cd twitter-feed-display-system
