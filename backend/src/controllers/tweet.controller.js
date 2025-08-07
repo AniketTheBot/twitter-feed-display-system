@@ -33,7 +33,7 @@ const fetchAndStoreTweets = asyncHandler(async (req, res) => {
     }
 
     const account = await Account.findOne({
-      username: username,
+      username: username.toLowerCase(),
     });
 
     if (!account) {
@@ -51,23 +51,41 @@ const fetchAndStoreTweets = asyncHandler(async (req, res) => {
 
     let apiResponse;
 
-    console.log(`PROD MODE: Calling real Twitter API for user ${username}.`);
-    const response = await axios.get(
-      `https://api.twitter.com/2/users/${account.twitterUserId}/tweets`,
-      {
-        headers: {
-          Authorization: `Bearer ${process.env.TWITTER_BEARER_TOKEN}`,
-        },
-        params: {
-          'tweet.fields': 'created_at,attachments', // Ask for attachments
-          expansions: 'author_id,attachments.media_keys', // EXPAND the media
-          'user.fields': 'username,name',
-          'media.fields': 'url,preview_image_url,type', // Ask for specific media fields
-          since_id: sinceId,
-        },
+    try {
+      console.log(`PROD MODE: Calling real Twitter API for user ${username}.`);
+      const response = await axios.get(
+        `https://api.twitter.com/2/users/${account.twitterUserId}/tweets`,
+        {
+          headers: {
+            Authorization: `Bearer ${process.env.TWITTER_BEARER_TOKEN}`,
+          },
+          params: {
+            'tweet.fields': 'created_at,attachments', // Ask for attachments
+            expansions: 'author_id,attachments.media_keys', // EXPAND the media
+            'user.fields': 'username,name',
+            'media.fields': 'url,preview_image_url,type', // Ask for specific media fields
+            since_id: sinceId,
+          },
+        }
+      );
+      apiResponse = response.data;
+    } catch (error) {
+      console.error(
+        `Twitter API Error during tweet fetch for @${username}:`,
+        error.response?.data || error.message
+      );
+      if (error.response?.status === 429) {
+        throw new ApiError(
+          429,
+          `Rate limit exceeded when fetching tweets for @${username}. Please wait 15 minutes.`
+        );
       }
-    );
-    apiResponse = response.data;
+      // For other errors
+      throw new ApiError(
+        500,
+        `Failed to fetch tweets for @${username} from Twitter.`
+      );
+    }
 
     if (!apiResponse || apiResponse.meta?.result_count === 0) {
       return res

@@ -21,4 +21,7 @@ import accountRouter from './routes/account.routes.js';
 app.use('/api/v1/tweets', tweetRouter);
 app.use('/api/v1/accounts', accountRouter);
 
+import { errorHandler } from './middlewares/error.middleware.js';
+app.use(errorHandler);
+
 export { app };

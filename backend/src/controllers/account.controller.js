@@ -45,10 +45,23 @@ const addAccount = asyncHandler(async (req, res) => {
   } catch (error) {
     // This catches errors if the Twitter API call itself fails (e.g., user not found, invalid token)
     console.error('Twitter API Error:', error.response?.data || error.message);
-    throw new ApiError(
-      404,
-      'Could not find a Twitter user with that username. Please check the handle and your API token.'
-    );
+
+    if (error.response?.status) {
+      const statusCode = error.response.status;
+
+      if (statusCode === 429) {
+        throw new ApiError(
+          429,
+          'Too many requests to the Twitter API. Please wait 15 minutes and try again.'
+        );
+      }
+      if (statusCode === 404) {
+        throw new ApiError(
+          404,
+          `The Twitter user "@${username}" could not be found.`
+        );
+      }
+    }
   }
 
   if (!userData) {
