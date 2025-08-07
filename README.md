@@ -52,7 +52,7 @@ Follow these instructions to get a copy of the project up and running on your lo
 
 1.  **Get the source Code:**
 
-    You have two options to get the source code:
+    You have two options to get the code. After this step, ensure your terminal is inside the main project folder.
 
     ##### Option A: Using Git (Recommended)
 
@@ -71,6 +71,10 @@ Follow these instructions to get a copy of the project up and running on your lo
 
     ```sh
     mv twitter-feed-display-system-main twitter-feed-display-system
+    ```
+
+    ```sh
+    cd twitter-feed-display-system
     ```
 
 2.  **Install Backend Dependencies:**
