@@ -12,6 +12,10 @@ const tweetSchema = new Schema(
       type: String,
       required: true,
     },
+
+    mediaUrl: {
+      type: String, // We will store the URL of the image or video preview
+    },
     tweetedAt: {
       type: Date,
       required: true,
@@ -31,7 +35,5 @@ const tweetSchema = new Schema(
     timestamps: true,
   }
 );
-//  It will automatically delete any document 7 days after it was created in our database.
-tweetSchema.index({ createdAt: 1 }, { expireAfterSeconds: 604800 });
 
 export const Tweet = mongoose.model('Tweet', tweetSchema);

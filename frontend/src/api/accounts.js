@@ -26,10 +26,20 @@ export const getAllTrackedAccounts = async () => {
 export const addNewAccount = async (username) => {
   try {
     const response = await axios.post(API_URL, { username });
-    // Our actual data is in response.data.data
     return response.data.data;
   } catch (error) {
     console.error('Error adding new account:', error);
+    throw error;
+  }
+};
+
+
+export const deleteTrackedAccount = async (username) => {
+  try {
+    const response = await axios.delete(`${API_URL}/${username}`);
+    return response.data;
+  } catch (error) {
+    console.error(`Error deleting account ${username}:`, error);
     throw error;
   }
 };

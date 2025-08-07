@@ -29,7 +29,6 @@ export const getNextTweetToDisplay = async (username) => {
     throw new Error('Username is required to get the next tweet.');
   }
   try {
-    // The URL now includes the username, as required by our new backend route
     const response = await axios.get(`${API_URL}/next/${username}`);
     return response.data; // The API response from the backend
   } catch (error) {

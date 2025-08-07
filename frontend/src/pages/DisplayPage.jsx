@@ -1,10 +1,8 @@
-// This is your new frontend/src/pages/DisplayPage.jsx
-
 import React from 'react';
 import { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { getNextTweetToDisplay } from '../api/tweets';
-import { QRCodeSVG } from 'qrcode.react'; // The new, crucial import
+import { QRCodeSVG } from 'qrcode.react';
 
 const TWEET_DISPLAY_DURATION = 10000;
 
@@ -62,7 +60,6 @@ function DisplayPage() {
     );
   }
 
-  // Helper to format the date
   const formatTimestamp = (dateString) => {
     const options = {
       year: 'numeric',
@@ -75,14 +72,11 @@ function DisplayPage() {
   };
   const tweetUrl = `https://x.com/${currentTweet.author.username}/status/${currentTweet.tweetId}`;
 
-  // 3. Display the username on the page to confirm it's working
   return (
     <div className="bg-black text-white min-h-screen flex flex-col items-center justify-center p-8 font-sans overflow-hidden">
-      {/* The main tweet card with fade transition */}
       <div
         className={`bg-gray-900 border border-gray-700 rounded-2xl shadow-2xl p-8 max-w-4xl w-full mx-auto transition-opacity duration-500 ${isFading ? 'opacity-0' : 'opacity-100'}`}
       >
-        {/* Author Info */}
         <div className="flex items-center mb-4">
           <div className="ml-4">
             <p className="text-3xl font-bold">{currentTweet.author.name}</p>
@@ -92,17 +86,24 @@ function DisplayPage() {
           </div>
         </div>
 
-        {/* Tweet Text */}
         <p className="text-4xl leading-snug my-6 whitespace-pre-wrap">
           {currentTweet.text}
         </p>
 
-        {/* Timestamp */}
+        {currentTweet.mediaUrl && (
+          <div className="mt-6">
+            <img
+              src={currentTweet.mediaUrl}
+              alt="Tweet media"
+              className="rounded-2xl max-h-[50vh] w-full object-contain"
+            />
+          </div>
+        )}
+
         <p className="text-gray-500 text-lg mb-6">
           {formatTimestamp(currentTweet.tweetedAt)}
         </p>
 
-        {/* QR Code Section */}
         <div className="flex flex-col items-center justify-center bg-white p-4 rounded-lg mt-4">
           <QRCodeSVG value={tweetUrl} size={150} includeMargin={true} />
           <p className="text-black font-semibold mt-2">Scan to view on X</p>

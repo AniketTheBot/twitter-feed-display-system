@@ -4,6 +4,7 @@ import { ApiError } from '../utils/ApiError.js';
 import { Account } from '../models/account.model.js';
 import axios from 'axios';
 import { mockAccounts } from '../dev-data/mock-accounts.js';
+import { Tweet } from '../models/tweet.model.js';
 
 /**
  * @description Adds a new Twitter account to our database for tracking.
@@ -11,7 +12,7 @@ import { mockAccounts } from '../dev-data/mock-accounts.js';
  * @body { "username": "some_twitter_handle" }
  */
 const addAccount = asyncHandler(async (req, res) => {
-  // 1. Get the username from the request body
+  //  Get the username from the request body
   const { username } = req.body;
   if (!username) {
     throw new ApiError(400, 'Username is required');
@@ -19,7 +20,7 @@ const addAccount = asyncHandler(async (req, res) => {
 
   const lowerCaseUsername = username.toLowerCase();
 
-  // 2. Check if we are already tracking this account
+  //  Check if we are already tracking this account
   const existingAccount = await Account.findOne({
     username: lowerCaseUsername,
   });
@@ -28,7 +29,7 @@ const addAccount = asyncHandler(async (req, res) => {
     throw new ApiError(409, 'This account is already being tracked.');
   }
 
-  // 3. If it's a new account, fetch its details from the Twitter API
+  // If it's a new account, fetch its details from the Twitter API
   let userData;
   try {
     const userResponse = await axios.get(
@@ -37,7 +38,7 @@ const addAccount = asyncHandler(async (req, res) => {
         headers: {
           Authorization: `Bearer ${process.env.TWITTER_BEARER_TOKEN}`,
         },
-        params: { 'user.fields': 'profile_image_url' }, // You can add more fields here if needed
+        params: { 'user.fields': 'profile_image_url' },
       }
     );
     userData = userResponse.data.data;
@@ -54,7 +55,7 @@ const addAccount = asyncHandler(async (req, res) => {
     throw new ApiError(404, 'Twitter user not found.');
   }
 
-  // 4. Create the new account document in our database
+  //  Create the new account document in our database
   const newAccount = await Account.create({
     twitterUserId: userData.id,
     username: userData.username.toLowerCase(),
@@ -66,7 +67,7 @@ const addAccount = asyncHandler(async (req, res) => {
     throw new ApiError(500, 'Failed to add the account to the database.');
   }
 
-  // 5. Send a success response
+  //  Send a success response
   return res
     .status(201)
     .json(
@@ -105,4 +106,22 @@ const getAllAccounts = asyncHandler(async (_, res) => {
     );
 });
 
-export { addAccount, getAllAccounts };
+const deleteAccount = asyncHandler(async (req, res) => {
+  const { username } = req.params;
+  if (!username) throw new ApiError(400, 'Username is required.');
+
+  const account = await Account.findOneAndDelete({
+    username: username.toLowerCase(),
+  });
+  if (!account) throw new ApiError(404, 'Account not found.');
+
+  // delete all tweets associated with this account
+  await Tweet.deleteMany({ author: account._id });
+
+  res
+    .status(200)
+    .json(new ApiResponse(200, null, 'Account and all its tweets deleted.'));
+});
+
+// Update your exports
+export { addAccount, getAllAccounts, deleteAccount };

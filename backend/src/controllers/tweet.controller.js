@@ -15,7 +15,6 @@ const fetchAndStoreTweets = asyncHandler(async (req, res) => {
     console.log(
       'DEV MODE: fetchAndStoreTweets was called, but we are using mock data instead.'
     );
-    // Reset our in-memory mock tweets to their original state
     devMockTweets = [...mockTweets];
     return res
       .status(200)
@@ -60,10 +59,11 @@ const fetchAndStoreTweets = asyncHandler(async (req, res) => {
           Authorization: `Bearer ${process.env.TWITTER_BEARER_TOKEN}`,
         },
         params: {
-          'tweet.fields': 'created_at',
-          expansions: 'author_id',
+          'tweet.fields': 'created_at,attachments', // Ask for attachments
+          expansions: 'author_id,attachments.media_keys', // EXPAND the media
           'user.fields': 'username,name',
-          since_id: sinceId, // Here is where we use the sinceId we found earlier!
+          'media.fields': 'url,preview_image_url,type', // Ask for specific media fields
+          since_id: sinceId,
         },
       }
     );
@@ -77,12 +77,35 @@ const fetchAndStoreTweets = asyncHandler(async (req, res) => {
         );
     }
 
-    const formattedTweets = apiResponse.data.map((tweet) => ({
-      tweetId: tweet.id,
-      text: tweet.text,
-      tweetedAt: new Date(tweet.created_at),
-      author: account._id, // It links to the Account.
-    }));
+    let mediaMap = new Map();
+    if (apiResponse.includes && apiResponse.includes.media) {
+      mediaMap = new Map(
+        apiResponse.includes.media.map((m) => [m.media_key, m])
+      );
+    }
+    const formattedTweets = apiResponse.data.map((tweet) => {
+      let mediaUrl = null;
+      const mediaKey = tweet.attachments?.media_keys?.[0];
+
+      if (mediaKey) {
+        const mediaDetails = mediaMap.get(mediaKey);
+        if (mediaDetails) {
+          // Use the 'url' for photos, and 'preview_image_url' for videos/gifs
+          mediaUrl =
+            mediaDetails.type === 'photo'
+              ? mediaDetails.url
+              : mediaDetails.preview_image_url;
+        }
+      }
+
+      return {
+        tweetId: tweet.id,
+        text: tweet.text,
+        tweetedAt: new Date(tweet.created_at),
+        author: account._id,
+        mediaUrl: mediaUrl, // Add the new field here
+      };
+    });
     try {
       const result = await Tweet.insertMany(formattedTweets, {
         ordered: false,
@@ -118,7 +141,7 @@ const getNextTweet = asyncHandler(async (req, res) => {
     throw new ApiError(400, 'Username parameter is required.');
   }
 
-  // --- THIS IS THE NEW MOCK LOGIC ---
+  // Logic for mock data
   if (process.env.NODE_ENV === 'development') {
     console.log(`DEV MODE: Getting next mock tweet for @${username}`);
     const mockAccount = mockAccounts.find(
@@ -144,11 +167,10 @@ const getNextTweet = asyncHandler(async (req, res) => {
     const randomIndex = Math.floor(Math.random() * undisplayedTweets.length);
     const nextTweet = undisplayedTweets[randomIndex];
 
-    // "Update" the in-memory mock tweet
+    // Update the in-memory mock tweet
     const tweetIndex = devMockTweets.findIndex((t) => t._id === nextTweet._id);
     devMockTweets[tweetIndex].isDisplayed = true;
 
-    // We need to manually "populate" the author details
     const tweetToSend = { ...nextTweet, author: mockAccount };
 
     return res
@@ -167,17 +189,15 @@ const getNextTweet = asyncHandler(async (req, res) => {
     }
     let wasReset = false;
 
-    // CORRECTED: Use find() to get an array of all undisplayed tweets.
     let undisplayedTweets = await Tweet.find({
       author: account._id,
       isDisplayed: false,
     });
 
-    // This `if` block now correctly checks if the array is empty.
     if (undisplayedTweets.length === 0) {
       console.log('All tweets displayed. Resetting feed...');
       wasReset = true;
-      // --- The Reset Logic ---
+      // Reset logic
       await Tweet.updateMany(
         { author: account._id },
         { $set: { isDisplayed: false } }
@@ -195,7 +215,6 @@ const getNextTweet = asyncHandler(async (req, res) => {
       }
     }
 
-    // 1. Select a random tweet from the list
     const randomIndex = Math.floor(Math.random() * undisplayedTweets.length);
     const nextTweet = undisplayedTweets[randomIndex];
 
@@ -212,7 +231,6 @@ const getNextTweet = asyncHandler(async (req, res) => {
 
     return res.status(200).json(new ApiResponse(200, tweetToSend, message));
   }
-  // 2. Find the corresponding Account document to get its unique _id
 });
 
 export { fetchAndStoreTweets, getNextTweet };

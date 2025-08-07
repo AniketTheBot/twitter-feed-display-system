@@ -8,20 +8,20 @@ dotenv.config({
   path: './.env',
 });
 
-const PORT = process.env.PORT || 8000; // Let's use 8000 to avoid conflicts
+const PORT = process.env.PORT || 8000; 
 
 connectDB()
   .then(() => {
     app.listen(PORT, () => {
-      console.log(`✅ Server is running at port : ${PORT}`);
+      console.log(` Server is running at port : ${PORT}`);
     });
 
     // --- Automatic Hourly Tweet Fetch Job ---
-    console.log('🕒 Cron job scheduler initialized.');
+    console.log(' Cron job scheduler initialized.');
 
     // This schedule runs at minute 0 of every hour ('0 * * * *')
     cron.schedule('0 * * * *', async () => {
-      console.log('⏰ Running hourly tweet fetch job...');
+      console.log(' Running hourly tweet fetch job...');
       const startTime = new Date();
       if (process.env.NODE_ENV !== 'production') {
         console.log('  -> SKIPPING JOB: Not in production environment.');
@@ -53,11 +53,11 @@ connectDB()
             const newTweetsSaved = response.data.data.newTweetsSaved || 0;
             totalNewTweets += newTweetsSaved;
             console.log(
-              `    ✅ Success. Found ${newTweetsSaved} new tweets for @${account.username}.`
+              `     Success. Found ${newTweetsSaved} new tweets for @${account.username}.`
             );
           } catch (error) {
             console.error(
-              `    ❌ Job failed for user: @${account.username}`,
+              `     Job failed for user: @${account.username}`,
               error.response?.data?.message || error.message
             );
           }
@@ -65,7 +65,7 @@ connectDB()
 
         const duration = (new Date() - startTime) / 1000; // Duration in seconds
         console.log(
-          `✅ Hourly job finished in ${duration}s. Total new tweets saved: ${totalNewTweets}.`
+          ` Hourly job finished in ${duration}s. Total new tweets saved: ${totalNewTweets}.`
         );
       } catch (error) {
         console.error(
