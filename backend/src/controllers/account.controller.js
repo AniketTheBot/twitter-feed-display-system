@@ -3,6 +3,7 @@ import { ApiResponse } from '../utils/ApiResponse.js';
 import { ApiError } from '../utils/ApiError.js';
 import { Account } from '../models/account.model.js';
 import axios from 'axios';
+import { mockAccounts } from '../dev-data/mock-accounts.js';
 
 /**
  * @description Adds a new Twitter account to our database for tracking.
@@ -30,7 +31,7 @@ const addAccount = asyncHandler(async (req, res) => {
   // 3. If it's a new account, fetch its details from the Twitter API
   let userData;
   try {
-    const userResponse = await axios.get( 
+    const userResponse = await axios.get(
       `https://api.twitter.com/2/users/by/username/${lowerCaseUsername}`,
       {
         headers: {
@@ -43,7 +44,10 @@ const addAccount = asyncHandler(async (req, res) => {
   } catch (error) {
     // This catches errors if the Twitter API call itself fails (e.g., user not found, invalid token)
     console.error('Twitter API Error:', error.response?.data || error.message);
-    throw new ApiError(404, 'Could not find a Twitter user with that username. Please check the handle and your API token.');
+    throw new ApiError(
+      404,
+      'Could not find a Twitter user with that username. Please check the handle and your API token.'
+    );
   }
 
   if (!userData) {
@@ -66,8 +70,39 @@ const addAccount = asyncHandler(async (req, res) => {
   return res
     .status(201)
     .json(
-      new ApiResponse(201, newAccount, 'Account added for tracking successfully.')
+      new ApiResponse(
+        201,
+        newAccount,
+        'Account added for tracking successfully.'
+      )
     );
 });
 
-export { addAccount };
+const getAllAccounts = asyncHandler(async (_, res) => {
+  if (process.env.NODE_ENV === 'development') {
+    console.log('DEV MODE: Serving mock accounts.');
+    // In dev mode, just return the hardcoded array of mock accounts.
+    return res
+      .status(200)
+      .json(
+        new ApiResponse(
+          200,
+          mockAccounts,
+          'Successfully fetched all tracked (mock) accounts.'
+        )
+      );
+  }
+  const allAccounts = await Account.find();
+
+  return res
+    .status(200)
+    .json(
+      new ApiResponse(
+        200,
+        allAccounts,
+        'Successfully fetched all tracked accounts.'
+      )
+    );
+});
+
+export { addAccount, getAllAccounts };

@@ -1,15 +1,160 @@
 import React from 'react';
+import { useEffect } from 'react';
+import { useState } from 'react';
+import { addNewAccount, getAllTrackedAccounts } from './api/accounts.js';
+import { Link } from 'react-router-dom';
+import { fetchTweetsForUser } from './api/tweets.js';
 
 function App() {
+  const [username, setUsername] = useState('');
+  const [trackedAccounts, setTrackedAccounts] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+
+  // Inside your App component
+  const apiCallStart = () => {
+    setLoading(true);
+    setError('');
+  };
+
+  const fetchTrackedAccounts = async () => {
+    console.log('fetching accounts');
+    apiCallStart();
+    try {
+      const accounts = await getAllTrackedAccounts();
+      setTrackedAccounts(accounts);
+    } catch (err) {
+      setError('Failed to fetchAccounts, Please ensure backend is running');
+    } finally {
+      setLoading(false);
+    }
+  };
+  const handleAddAccount = async (e) => {
+    e.preventDefault();
+    const sanitizedUsername = username.trim().replace('@', '');
+    if (!sanitizedUsername) return;
+
+    apiCallStart(); // Or your setLoading(true), setError('')
+
+    try {
+      // Call #1: Add the account
+      console.log(`Attempting to add account: ${sanitizedUsername}`);
+      await addNewAccount(sanitizedUsername);
+      console.log(`Account ${sanitizedUsername} added successfully.`);
+
+      // Call #2: Immediately fetch their initial tweets
+      console.log(`Fetching initial tweets for ${sanitizedUsername}...`);
+      await fetchTweetsForUser(sanitizedUsername);
+      console.log(`Initial tweets for ${sanitizedUsername} fetched.`);
+
+      // Call #3: Clear input and refresh the list of account cards
+      setUsername('');
+      await fetchTrackedAccounts();
+    } catch (err) {
+      // Get the status code and message from the backend's response
+      const statusCode = err.response?.status;
+      const errorMessage =
+        err.response?.data?.message || 'An unexpected error occurred.';
+
+      if (statusCode === 409) {
+        // ...show a loud, clear browser alert.
+        alert(errorMessage);
+      } else {
+        // For all other errors (like user not found, server down, etc.),
+        // show the red text message below the form.
+        setError(errorMessage);
+      }
+    } finally {
+      setLoading(false); // Make sure you have a finally block here
+    }
+  };
+
+  useEffect(() => {
+    fetchTrackedAccounts();
+  }, []);
   return (
-    <div className="min-h-screen bg-gray-900 flex items-center justify-center">
-      <div className="text-center">
-        <h1 className="text-5xl font-extrabold text-white">
-          Hello, Tailwind!
-        </h1>
-        <p className="mt-4 text-lg text-cyan-400 underline decoration-wavy">
-          Our frontend is now beautifully styled.
-        </p>
+    <div className="bg-gray-900 text-white min-h-screen font-sans p-8">
+      <div className="max-w-4xl mx-auto">
+        {/* Header */}
+        <header className="text-center mb-12">
+          <h1 className="text-5xl font-extrabold text-cyan-400">
+            Twitter Feed Display System
+          </h1>
+          <p className="text-gray-400 mt-2">Control Panel</p>
+          {/* The old generic button has been removed */}
+        </header>
+
+        {/* Form to Add New Accounts */}
+        <section className="bg-gray-800 p-6 rounded-lg shadow-xl mb-8">
+          <h2 className="text-2xl font-bold mb-4">
+            Add a Twitter Account to Track
+          </h2>
+          <form
+            onSubmit={handleAddAccount}
+            className="flex flex-col sm:flex-row gap-4"
+          >
+            <input
+              type="text"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
+              placeholder="Enter username (e.g., XDevelopers)"
+              className="flex-grow bg-gray-700 p-3 rounded-md focus:ring-2 focus:ring-cyan-500 focus:outline-none"
+            />
+            <button
+              type="submit"
+              disabled={loading}
+              className="bg-cyan-600 hover:bg-cyan-700 px-6 py-3 rounded-md font-bold transition-colors duration-200 disabled:bg-gray-600 disabled:cursor-not-allowed"
+            >
+              {loading ? 'Adding...' : 'Add Account'}
+            </button>
+          </form>
+          {error && (
+            <p className="text-red-500 mt-3 text-center sm:text-left">
+              {error}
+            </p>
+          )}
+        </section>
+
+        {/* Display of Tracked Accounts */}
+        <section>
+          <h2 className="text-2xl font-bold mb-4">
+            Click an Account to View Feed
+          </h2>
+          {/* Informational text for when the list is empty */}
+          {!loading && trackedAccounts.length === 0 && (
+            <div className="bg-gray-800 p-6 rounded-lg text-center text-gray-400">
+              <p>No accounts are being tracked yet.</p>
+              <p>Add one using the form above to get started!</p>
+            </div>
+          )}
+
+          {/* The grid of clickable account cards */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {trackedAccounts.map((account) => (
+              <Link
+                key={account._id}
+                to={`/display/${account.username}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="block" // Make the link a block element
+              >
+                <div className="bg-gray-800 p-4 rounded-lg flex items-center gap-4 h-full transform hover:scale-105 hover:bg-gray-700 transition-all duration-300 ease-in-out cursor-pointer shadow-lg">
+                  <img
+                    src={account.profileImageUrl}
+                    alt={account.name}
+                    className="w-14 h-14 rounded-full border-2 border-gray-600"
+                  />
+                  <div>
+                    <p className="font-bold text-lg text-white">
+                      {account.name}
+                    </p>
+                    <p className="text-cyan-400">@{account.username}</p>
+                  </div>
+                </div>
+              </Link>
+            ))}
+          </div>
+        </section>
       </div>
     </div>
   );

@@ -7,6 +7,6 @@ import {
 const router = Router();
 
 router.route('/fetch/:username').post(fetchAndStoreTweets);
-router.route('/next').get(getNextTweet);
+router.route('/next/:username').get(getNextTweet);
 
 export default router;
