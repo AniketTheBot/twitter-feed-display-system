@@ -16,9 +16,11 @@ app.use(express.urlencoded({ extended: true, limit: '16kb' }));
 
 // --- Routes ---
 import tweetRouter from './routes/tweet.routes.js';
+import accountRouter from './routes/account.routes.js';
 
 // Route declaration
 // This makes it so all routes in tweet.routes.js are prefixed with /api/v1/tweets
 app.use('/api/v1/tweets', tweetRouter);
+app.use('/api/v1/accounts', accountRouter);
 
 export { app };
