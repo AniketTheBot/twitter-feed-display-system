@@ -31,5 +31,7 @@ const tweetSchema = new Schema(
     timestamps: true,
   }
 );
+//  It will automatically delete any document 7 days after it was created in our database.
+tweetSchema.index({ createdAt: 1 }, { expireAfterSeconds: 604800 });
 
 export const Tweet = mongoose.model('Tweet', tweetSchema);
