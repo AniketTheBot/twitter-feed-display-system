@@ -113,6 +113,7 @@ Follow these instructions to get a copy of the project up and running on your lo
 
     # Set to 'development' for local testing or 'production' to use live API calls
     NODE_ENV=development
+    
     ```
 
 ### Obtaining the Twitter Bearer Token
@@ -132,6 +133,7 @@ To use this application in `production` mode, you need a Bearer Token from the T
     - Copy the token string. _Be sure to save it somewhere safe, as it may only be shown to you once._
 
 6.  **Add to `.env` file**: Paste the copied token into the `TWITTER_BEARER_TOKEN` variable in your `backend/.env` file.
+7.  **Set the Environment**: Ensure that `NODE_ENV` is set to `production` in your `.env` file if you want to use live API calls. If you're testing locally, you can set it to `development`.
 
 ### Running the Application
 
