@@ -50,28 +50,47 @@ Follow these instructions to get a copy of the project up and running on your lo
 
 ### Installation & Setup
 
-1.  **Clone the repository:**
+1.  **Get the source Code:**
+
+    You have two options to get the source code:
+
+    ##### Option A: Using Git (Recommended)
+
     ```sh
     git clone https://github.com/AniketTheBot/twitter-feed-display-system.git
-    cd twitter-display-system
+    cd twitter-feed-display-system
+    ```
+
+    ##### Option B: Downloading as a ZIP
+    - Go to the [GitHub repository](https://github.com/AniketTheBot/twitter-feed-display-system).
+    - Click the green `<> Code` button.
+    - Select **Download ZIP** from the dropdown menu.
+    - Unzip the downloaded file (`twitter-feed-display-system-main.zip`) to a location on your computer.
+    - Open your terminal and navigate into the extracted project folder (e.g., `cd path/to/twitter-feed-display-system-main`).
+    - Rename the folder to `twitter-feed-display-system` for consistency.
+
+    ```sh
+    mv twitter-feed-display-system-main twitter-feed-display-system
     ```
 
 2.  **Install Backend Dependencies:**
+
     ```sh
     cd backend
     npm install
     ```
 
 3.  **Install Frontend Dependencies:**
+
     ```sh
     cd ../frontend
     npm install
     ```
 
 4.  **Configure Backend Environment Variables:**
-    -   Navigate to the `backend` directory.
-    -   Create a `.env` file.
-    -   Add the following variables to your `.env` file:
+    - Navigate to the `backend` directory.
+    - Create a `.env` file.
+    - Add the following variables to your `.env` file:
 
     ```env
     # Your MongoDB connection string
@@ -79,7 +98,7 @@ Follow these instructions to get a copy of the project up and running on your lo
 
     # Your Twitter API v2 Bearer Token (see instructions below)
     TWITTER_BEARER_TOKEN="YOUR_BEARER_TOKEN_HERE"
-    
+
     # The port for the backend server
     PORT=5000
 
@@ -103,8 +122,8 @@ To use this application in `production` mode, you need a Bearer Token from the T
 4.  **Find Your Keys and Tokens**: Once your App is created, select it from the dashboard. Navigate to the **Keys and tokens** tab for that App.
 
 5.  **Copy the Bearer Token**: You will see several credentials (API Key, API Key Secret, etc.). The one you need is the **Bearer Token**. It's a long, secure string.
-    -   Click the "View" or "Generate" button next to it.
-    -   Copy the token string. *Be sure to save it somewhere safe, as it may only be shown to you once.*
+    - Click the "View" or "Generate" button next to it.
+    - Copy the token string. _Be sure to save it somewhere safe, as it may only be shown to you once._
 
 6.  **Add to `.env` file**: Paste the copied token into the `TWITTER_BEARER_TOKEN` variable in your `backend/.env` file.
 
@@ -113,25 +132,25 @@ To use this application in `production` mode, you need a Bearer Token from the T
 You will need two separate terminals to run both the backend and frontend servers concurrently.
 
 1.  **Run the Backend Server:**
-    -   In a terminal, navigate to the `backend` directory.
-    -   Run the development server:
-        ```sh
-        npm run dev
-        ```
-    -   The server should start on `http://localhost:5000` (or the port you specified).
+    - In a terminal, navigate to the `backend` directory.
+    - Run the development server:
+      ```sh
+      npm run dev
+      ```
+    - The server should start on `http://localhost:5000` (or the port you specified).
 
 2.  **Run the Frontend Server:**
-    -   In a second terminal, navigate to the `frontend` directory.
-    -   Run the development server:
-        ```sh
-        npm run dev
-        ```
-    -   The application will be available at `http://localhost:5173`.
+    - In a second terminal, navigate to the `frontend` directory.
+    - Run the development server:
+      ```sh
+      npm run dev
+      ```
+    - The application will be available at `http://localhost:5173`.
 
 ## Application Workflow
 
 1.  **Open the Control Panel**: Navigate to `http://localhost:5173` in your browser.
 2.  **Add an Account**: Enter a valid Twitter username (e.g., "XDevelopers") and click "Add Account".
-    -   This makes a live API call to validate and save the user. The system then automatically fetches that user's initial batch of tweets (in production mode) or uses mock data (in development mode).
+    - This makes a live API call to validate and save the user. The system then automatically fetches that user's initial batch of tweets (in production mode) or uses mock data (in development mode).
 3.  **Launch Display**: Click on any of the account cards in the "Tracked Accounts" section.
 4.  **View the Feed**: A new tab will open with the display page, which will start cycling through the tweets for that specific user. Scan the QR code on any tweet to visit it on X.com.
